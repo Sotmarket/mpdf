@@ -17,6 +17,7 @@ define('mPDF_VERSION','5.6');
 
 //Scale factor
 define('_MPDFK', (72/25.4));
+//define('_MPDFK', 6);
 
 /*-- HTML-CSS --*/
 define('AUTOFONT_CJK',1);
@@ -1330,14 +1331,19 @@ function _setPageSize($format, &$orientation) {
 	if(is_string($format))
 	{
 		if ($format=='') { $format = 'A4'; }
-		$pfo = 'P';
+		$pfo = ($orientation)?$orientation:'P';
 		if(preg_match('/([0-9a-zA-Z]*)-L/i',$format,$m)) {	// e.g. A4-L = A4 landscape
 			$format=$m[1]; 
 			$pfo='L'; 
 		}
 		$format = $this->_getPageFormat($format);
-		if (!$format) { $this->Error('Unknown page format: '.$format); }
-		else { $orientation = $pfo; }
+		if (!$format) {
+            $this->Error('Unknown page format: '.$format);
+        }
+		else {
+
+            $orientation = $pfo;
+        }
 
 		$this->fwPt=$format[0];
 		$this->fhPt=$format[1];
@@ -1352,6 +1358,7 @@ function _setPageSize($format, &$orientation) {
 	$this->fh=$this->fhPt/_MPDFK;
 	//Page orientation
 	$orientation=strtolower($orientation);
+    //print_r($orientation); die();
 	if($orientation=='p' or $orientation=='portrait')
 	{
 		$orientation='P';
@@ -11127,7 +11134,7 @@ function TableHeaderFooter($content='',$tablestartpage='',$tablestartcolumn ='',
    }
 
    $topy = $content[$firstrow][0]['y']-$this->y;
-   $this->y =0;
+   $this->y =$this->orig_tMargin;
    for ($i=$firstrow ; $i<=$lastrow; $i++) {
 
     $y = $this->y;
