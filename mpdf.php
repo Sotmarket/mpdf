@@ -48,10 +48,7 @@ if (!defined('_MPDF_TEMP_PATH')) define("_MPDF_TEMP_PATH", _MPDF_PATH.'tmp/');
 if (!defined('_MPDF_TTFONTPATH')) { define('_MPDF_TTFONTPATH',_MPDF_PATH.'ttfonts/'); }
 if (!defined('_MPDF_TTFONTDATAPATH')) { define('_MPDF_TTFONTDATAPATH',_MPDF_PATH.'ttfontdata/'); }
 
-$errorlevel=error_reporting();
-$errorlevel=error_reporting($errorlevel & ~E_NOTICE);
 
-//error_reporting(E_ALL);
 
 if(function_exists("date_default_timezone_set")) {
 	if (ini_get("date.timezone")=="") { date_default_timezone_set("Europe/London"); }
@@ -820,7 +817,7 @@ var $ispre;
 var $outerblocktags;
 var $innerblocktags;
 
-var $hasOc;
+var $hasOC;
 // **********************************
 // **********************************
 // **********************************
@@ -2549,8 +2546,12 @@ function AddSpotColor($name, $c, $m, $y, $k) {
 
 function SetColor($col, $type='') {
 	$out = '';
+
 	if ($col{0}==3 || $col{0}==5) {	// RGB / RGBa
-		$out = sprintf('%.3F %.3F %.3F rg',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
+        if (isset($col{1}) && isset($col{2}) && isset($col{3})){
+            $out = sprintf('%.3F %.3F %.3F rg',ord($col{1})/255,ord($col{2})/255,ord($col{3})/255);
+        }
+
 	}
 	else if ($col{0}==1) {	// GRAYSCALE
 		$out = sprintf('%.3F g',ord($col{1})/255);
@@ -14369,10 +14370,16 @@ function array_merge_recursive_unique($array1, $array2) {
 
 
 function _mergeFullCSS($p, &$t, $tag, $classes, $id) {
-		$this->_mergeCSS($p[$tag], $t);
+    if (isset($p[$tag])){
+        $this->_mergeCSS($p[$tag], $t);
+    }
+
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach($classes AS $class) {
-		  $this->_mergeCSS($p['CLASS>>'.$class], $t);
+            if (isset($p['CLASS>>'.$class])){
+                $this->_mergeCSS($p['CLASS>>'.$class], $t);
+            }
+
 		}
 		// STYLESHEET nth-child SELECTOR e.g. tr:nth-child(odd)  td:nth-child(2n+1)
 		if ($tag=='TR' && isset($p) && $p)  {
@@ -14405,15 +14412,18 @@ function _mergeFullCSS($p, &$t, $tag, $classes, $id) {
 			}
 		}
 		// STYLESHEET CLASS e.g. #smallone{}  #redletter{}
-		if (isset($id) && $id) {
+		if (isset($id) && $id && isset($p['ID>>'.$id])) {
 		  $this->_mergeCSS($p['ID>>'.$id], $t);
 		}
 		// STYLESHEET CLASS e.g. .smallone{}  .redletter{}
 		foreach($classes AS $class) {
-		  $this->_mergeCSS($p[$tag.'>>CLASS>>'.$class], $t);
+            if (isset($p[$tag.'>>CLASS>>'.$class])){
+                $this->_mergeCSS($p[$tag.'>>CLASS>>'.$class], $t);
+            }
+
 		}
 		// STYLESHEET CLASS e.g. #smallone{}  #redletter{}
-		if (isset($id)) {
+		if (isset($id) && isset($p[$tag.'>>ID>>'.$id])) {
 		  $this->_mergeCSS($p[$tag.'>>ID>>'.$id], $t);
 		}
 }
@@ -14547,7 +14557,10 @@ function MergeCSS($inherit,$tag,$attr) {
 		//===============================================
 		// Cascading forward CSS
 		//===============================================
-		$this->_mergeFullCSS($this->blk[$this->blklvl-1]['cascadeCSS'], $this->blk[$this->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID']);
+        if (isset($this->blk[$this->blklvl-1])){
+            $this->_mergeFullCSS($this->blk[$this->blklvl-1]['cascadeCSS'], $this->blk[$this->blklvl]['cascadeCSS'], $tag, $classes, $attr['ID']);
+        }
+
 		//===============================================
 		  // Block properties
 		  if (isset($this->blk[$this->blklvl-1]['margin_collapse']) && $this->blk[$this->blklvl-1]['margin_collapse']) { $p['MARGIN-COLLAPSE'] = 'COLLAPSE'; }	// custom tag, but follows CSS principle that border-collapse is inherited
@@ -15063,9 +15076,9 @@ function SetPagedMediaCSS($name='', $first, $oddEven) {
 	if (isset($p['PAGENUMSTYLE']) && $p['PAGENUMSTYLE']) { $pagenumstyle = $p['PAGENUMSTYLE']; }
 	if (isset($p['SUPPRESS']) && $p['SUPPRESS']) { $suppress = $p['SUPPRESS']; }
 
-  	if (preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
-  	else if (strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
-  	else if (strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
+  	if (isset($p['MARKS']) && preg_match('/cross/i', $p['MARKS']) && preg_match('/crop/i', $p['MARKS'])) { $marks = 'CROPCROSS'; }
+  	else if (isset($p['MARKS']) && strtoupper($p['MARKS']) == 'CROP') { $marks = 'CROP'; }
+  	else if (isset($p['MARKS']) && strtoupper($p['MARKS']) == 'CROSS') { $marks = 'CROSS'; }
 
 
 	if (isset($p['BACKGROUND-COLOR']) && $p['BACKGROUND-COLOR']) { $bg['BACKGROUND-COLOR'] = $p['BACKGROUND-COLOR']; }
@@ -27241,7 +27254,12 @@ function _tableWrite(&$table, $split=false, $startrow=0, $startcol=0, $splitpg=0
 							$cell['textbuffer'][0][0] = preg_replace('/{colsum[0-9_]*}/', $rep ,$cell['textbuffer'][0][0]);
 						}
 					}
-					else { $this->colsums[$j] += floatval(preg_replace('/^[^0-9\.\,]*/','',$cell['textbuffer'][0][0])); }
+					else {
+                        if (!isset($this->colsums[$j])){
+                            $this->colsums[$j] = 0;
+                        }
+                        $this->colsums[$j] += floatval(preg_replace('/^[^0-9\.\,]*/','',$cell['textbuffer'][0][0]));
+                    }
 				}
 				$opy = $this->y;
 				// mPDF ITERATION
