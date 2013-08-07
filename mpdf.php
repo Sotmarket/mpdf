@@ -3518,9 +3518,9 @@ function Cell($w,$h=0,$txt='',$border=0,$ln=0,$align='',$fill=0,$link='', $curre
 	$oldcolumn = $this->CurrCol;
 	// Automatic page break
 	// Allows PAGE-BREAK-AFTER = avoid to work
-
+    $page_break_after_avoid = (isset($this->blk[$this->blklvl]))?$this->blk[$this->blklvl]['page_break_after_avoid']:0;
 	if (!$this->tableLevel && (($this->y+$this->divheight>$this->PageBreakTrigger) || ($this->y+$h>$this->PageBreakTrigger) || 
-		($this->y+($h*2)>$this->PageBreakTrigger && $this->blk[$this->blklvl]['page_break_after_avoid'])) and !$this->InFooter and $this->AcceptPageBreak()) {
+		($this->y+($h*2)>$this->PageBreakTrigger && $page_break_after_avoid)) and !$this->InFooter and $this->AcceptPageBreak()) {
 		$x=$this->x;//Current X position
 
 
@@ -6947,7 +6947,7 @@ function Ln($h='',$collapsible=0)
 // Added collapsible to allow collapsible top-margin on new page
 	//Line feed; default value is last cell height
     $outer_left_margin = (isset($this->blk[$this->blklvl]))?$this->blk[$this->blklvl]['outer_left_margin']:0;
-	$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
+	$this->x = $this->lMargin + $outer_left_margin;
 	if ($collapsible && ($this->y==$this->tMargin) && (!$this->ColActive)) { $h = 0; }
 	if(is_string($h)) $this->y+=$this->lasth;
 	else $this->y+=$h;
