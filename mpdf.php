@@ -6946,6 +6946,7 @@ function Ln($h='',$collapsible=0)
 {
 // Added collapsible to allow collapsible top-margin on new page
 	//Line feed; default value is last cell height
+    $outer_left_margin = (isset($this->blk[$this->blklvl]))?$this->blk[$this->blklvl]['outer_left_margin']:0;
 	$this->x = $this->lMargin + $this->blk[$this->blklvl]['outer_left_margin'];
 	if ($collapsible && ($this->y==$this->tMargin) && (!$this->ColActive)) { $h = 0; }
 	if(is_string($h)) $this->y+=$this->lasth;
