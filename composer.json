@@ -1,5 +1,5 @@
 {
-    "name":"Sotmarket/mpdf",
+    "name":"sabsab/mpdf",
     "version":"5.6.0",
     "require":{
         "php":">=5.3.0"
